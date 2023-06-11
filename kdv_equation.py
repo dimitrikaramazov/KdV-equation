@@ -3,7 +3,7 @@ import scipy.fft as fft
 import math
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-
+from matplotlib.animation import FuncAnimation
 # constants
 N = 256
 n = 500000
@@ -51,11 +51,47 @@ cond_init = c1  / (2 * np.square(np.cosh(math.sqrt(c1) * (x - a1 * L) / 2))) + c
 
 u = kdv(cond_init, N, dt, n, L)
 
-[xx,tt]=np.meshgrid(x,t)
-levels = np.linspace(0, c1 / 2, 10)
-plt.contourf(xx,tt, u, levels, cmap = cm.jet, extend='both')
-plt.colorbar()
-plt.xlabel('x')
-plt.ylabel('t')
-plt.title('2 solitons')
-plt.show()
+# plot the evolution of 2 solitons
+if True:
+    [xx,tt]=np.meshgrid(x,t)
+    levels = np.linspace(0, c1 / 2, 10)
+    plt.contourf(xx,tt, u, levels, cmap = cm.jet, extend='both')
+    plt.colorbar()
+    plt.xlabel('x')
+    plt.ylabel('t')
+    plt.title('Korteweg-de Vries equation - 2 solitons')
+    plt.savefig('2solitons.png')
+
+# plot a few snapshots when they colide
+if False:
+    k = 50000
+    for j in range(k, n, 2500):
+        plt.clf()
+        plt.plot(x, u[j,:])
+        plt.ylim(0, 0.5)
+        plt.grid()
+        plt.savefig("time" + str(j*dt) + ".png")
+
+
+# make an animation of the colision
+if False:
+    k = 50000
+    interval = 100  
+
+    fig, ax = plt.subplots()
+    ax.set_ylim(0, 0.5)
+    ax.grid()
+
+    line, = ax.plot([], [])
+
+    def update(frame):
+        j = k + frame * 2500
+        ax.cla()  
+        ax.plot(x, u[j, :])
+        ax.set_ylim(0, 0.5)
+        ax.grid()
+        ax.set_title('Time: {:.2f}'.format(j * dt))
+
+    animation = FuncAnimation(fig, update, frames=40, interval=interval)
+
+    animation.save('2_solitons_colision.gif', writer='pillow')
