@@ -4,6 +4,8 @@ import math
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib.animation import FuncAnimation
+
+
 # constants
 N = 256
 n = 500000
@@ -51,19 +53,133 @@ cond_init = c1  / (2 * np.square(np.cosh(math.sqrt(c1) * (x - a1 * L) / 2))) + c
 
 u = kdv(cond_init, N, dt, n, L)
 
-# plot the evolution of 2 solitons
-if True:
+
+#Analytical double soliton
+
+
+u_an = []
+
+for i in range(n) :
+    
+    u_an.append(c1  / (2 * np.square(np.cosh((math.sqrt(c1) * (x - a1 * L - c1 * t[i]) % L / 2)))) + c2  / (2 * np.square(np.cosh((math.sqrt(c2) * ((x - a2 * L - c2 * t[i]) % L) / 2) ))))
+
+
+
+
+#Two solitons individually (analytical) :
+    
+u_1 = []
+u_2 = []
+for i in range(n) :
+    u_1.append(c1  / (2 * np.square(np.cosh(math.sqrt(c1) * ((x - a1 * L - c1 * t[i]) % L) / 2 ))))
+for i in range(n) :
+    u_2.append(c2  / (2 * np.square(np.cosh(math.sqrt(c2) * ((x - a2 * L - c2 * t[i] ) % L) / 2   ))) )
+    
+#Now, the two solitons individually (numerical) :
+    
+    
+cond_init_1 = c1  / (2 * np.square(np.cosh(math.sqrt(c1) * (x - a1 * L) / 2 )))
+cond_init_2 = c2  / (2 * np.square(np.cosh(math.sqrt(c2) * (x - a2 * L) / 2 )))
+u_n1 = kdv(cond_init_1, N, dt, n, L)   
+u_n2 = kdv(cond_init_2, N, dt, n, L)
+
+
+
+#Range of approximation :
+    
+norm = []
+n_t = 112500
+time = []
+for i in range(n_t):
+    
+    time.append(i*dt)
+    
+for i in range(n_t):
+    
+    norm.append(np.abs(np.linalg.norm(u_an[i] - u[i])))
+if True :
+
+    plt.plot(time,norm)
+    plt.title('The difference between analytical and numerical (2solitons)')
+    plt.xlabel('Time (t)')
+    plt.ylabel('norm of the difference')
+    plt.show()
+
+    #Now for one soliton :
+    norm1 = [] 
+    for i in range(n):
+    
+        norm1.append(np.abs(np.linalg.norm(u_n1[i] - u_1[i])))  
+   
+    plt.plot(t,norm1)
+    plt.title('The difference between analytical and numerical (1soliton)')
+    plt.xlabel('Time (t)')
+    plt.ylabel('norm of the difference')
+    plt.show()
+
+    #All the time-space plots :
+
+    [xx,tt]=np.meshgrid(x,t)
+    levels = np.linspace(0, c1 / 2, 10)
+    plt.contourf(xx,tt, u_1, levels, cmap = cm.jet, extend='both')
+    plt.colorbar()
+    plt.xlabel('x')
+    plt.ylabel('t')
+    plt.title('soliton 1 (numerical)')
+    plt.show()
+
+
+    [xx,tt]=np.meshgrid(x,t)
+    levels = np.linspace(0, c1 / 2, 10)
+    plt.contourf(xx,tt, u_n1, levels, cmap = cm.jet, extend='both')
+    plt.colorbar()
+    plt.xlabel('x')
+    plt.ylabel('t')
+    plt.title('soliton 1 (analytical)')
+    plt.show()
+
+
+    
+    [xx,tt]=np.meshgrid(x,t)
+    levels = np.linspace(0, c1 / 2, 10)
+    plt.contourf(xx,tt, u_2, levels, cmap = cm.jet, extend='both')
+    plt.colorbar()
+    plt.xlabel('x')
+    plt.ylabel('t')
+    plt.title('soliton 2 (numerical)')
+    plt.show()
+
+    
+    [xx,tt]=np.meshgrid(x,t)
+    levels = np.linspace(0, c1 / 2, 10)
+    plt.contourf(xx,tt, u_n2, levels, cmap = cm.jet, extend='both')
+    plt.colorbar()
+    plt.xlabel('x')
+    plt.ylabel('t')
+    plt.title('soliton 2 (analytical)')
+    plt.show()
+
+   
     [xx,tt]=np.meshgrid(x,t)
     levels = np.linspace(0, c1 / 2, 10)
     plt.contourf(xx,tt, u, levels, cmap = cm.jet, extend='both')
     plt.colorbar()
     plt.xlabel('x')
     plt.ylabel('t')
-    plt.title('Korteweg-de Vries equation - 2 solitons')
-    plt.savefig('2solitons.png')
+    plt.title('2 solitons (numerical)')
+    plt.show()
+    [xx,tt]=np.meshgrid(x,t)
+
+    levels = np.linspace(0, c1 / 2, 10)
+    plt.contourf(xx,tt, u_an, levels, cmap = cm.jet, extend='both')
+    plt.colorbar()
+    plt.xlabel('x')
+    plt.ylabel('t')
+    plt.title('2 solitons(analytical)')
+    plt.show()
 
 # plot a few snapshots when they colide
-if False:
+if True:
     k = 50000
     for j in range(k, n, 2500):
         plt.clf()
@@ -74,7 +190,7 @@ if False:
 
 
 # make an animation of the colision
-if False:
+if True:
     k = 50000
     interval = 100  
 
@@ -95,3 +211,4 @@ if False:
     animation = FuncAnimation(fig, update, frames=40, interval=interval)
 
     animation.save('2_solitons_colision.gif', writer='pillow')
+
